@@ -109,7 +109,9 @@ sudo keystone-manage ssl_setup --keystone-user keystone --keystone-group keyston
 sudo cp /etc/keystone/ssl/certs/ca.pem /etc/ssl/certs/ca.pem
 sudo c_rehash /etc/ssl/certs/ca.pem
 sudo cp /etc/keystone/ssl/certs/ca.pem /vagrant/ca.pem
-sudo cp /etc/keystone/ssl/certs/cakey.pem /vagrant/cakey.pem
+sudo cp /etc/keystone/ssl/certs/keystone.pem /vagrant/keystone.pem
+sudo cp /etc/keystone/ssl/private/keystonekey.pem /vagrant/keystonekey.pem
+
 
 # This runs for both LDAP and non-LDAP configs
 create_endpoints(){
@@ -120,7 +122,8 @@ create_endpoints(){
   export SERVICE_ENDPOINT=https://${ENDPOINT}:35357/v2.0
   export PASSWORD=openstack
   export OS_CACERT=/vagrant/ca.pem
-  export OS_KEY=/vagrant/cakey.pem
+  export OS_KEY=/vagrant/keystonekey.pem
+  export OS_CERT=/vagrant/keystone.pem
 
    # OpenStack Compute Nova API Endpoint
   keystone  service-create --name nova --type compute --description 'OpenStack Compute Service'
@@ -871,8 +874,9 @@ export OS_TENANT_NAME=cookbook
 export OS_USERNAME=admin
 export OS_PASSWORD=openstack
 export OS_AUTH_URL=https://${MY_IP}:5000/v2.0/
-export OS_KEY=/vagrant/cakey.pem
 export OS_CACERT=/vagrant/ca.pem
+export OS_KEY=/vagrant/keystonekey.pem
+export OS_CERT=/vagrant/keystone.pem
 EOF
 
 # Hack: restart neutron again...

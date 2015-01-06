@@ -15,9 +15,9 @@
 
 export DEBIAN_FRONTEND=noninteractive
 
-#export CONTROLLER_HOST=172.16.0.200
+export CONTROLLER_HOST=172.16.0.200
 #Dynamically determine first three octets if user specifies alternative IP ranges.  Fourth octet still hardcoded
-export CONTROLLER_HOST=$(ifconfig eth1 | awk '/inet addr/ {split ($2,A,":"); print A[2]}' | sed 's/\.[0-9]*$/.200/')
+#export CONTROLLER_HOST=$(ifconfig eth1 | awk '/inet addr/ {split ($2,A,":"); print A[2]}' | sed 's/\.[0-9]*$/.200/')
 export GLANCE_HOST=${CONTROLLER_HOST}
 export MYSQL_HOST=${CONTROLLER_HOST}
 export KEYSTONE_ENDPOINT=${CONTROLLER_HOST}
@@ -29,7 +29,8 @@ export SERVICE_TOKEN=ADMIN
 export SERVICE_ENDPOINT=https://${ENDPOINT}:35357/v2.0
 export MONGO_KEY=MongoFoo
 export OS_CACERT=/vagrant/ca.pem
-export OS_KEY=/vagrant/cakey.pem
+export OS_KEY=/vagrant/keystonekey.pem
+export OS_CERT=/vagrant/keystone.pem
 
 sudo apt-get install -y software-properties-common ubuntu-cloud-keyring
 sudo add-apt-repository -y cloud-archive:juno
