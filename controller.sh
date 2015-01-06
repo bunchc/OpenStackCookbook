@@ -871,6 +871,8 @@ export OS_TENANT_NAME=cookbook
 export OS_USERNAME=admin
 export OS_PASSWORD=openstack
 export OS_AUTH_URL=https://${MY_IP}:5000/v2.0/
+export OS_KEY=/vagrant/cakey.pem
+export OS_CACERT=/vagrant/ca.pem
 EOF
 
 # Hack: restart neutron again...

@@ -7,3 +7,5 @@ demokey
 packer_cache/
 *.box
 *.pub
+ca.pem
+cakey.pem
