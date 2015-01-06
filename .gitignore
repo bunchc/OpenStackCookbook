@@ -9,3 +9,5 @@ packer_cache/
 *.pub
 ca.pem
 cakey.pem
+keystone.pem
+keystonekey.pem

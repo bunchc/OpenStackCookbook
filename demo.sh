@@ -9,7 +9,7 @@ export OS_CACERT=/vagrant/ca.pem
 
 # Aliases for insecure SSL
 # alias nova='nova --insecure'
- alias keystone='keystone --insecure'
+# alias keystone='keystone --insecure'
 # alias neutron='neutron --insecure'
 # alias glance='glance --insecure'
 # alias cinder='cinder --insecure'
