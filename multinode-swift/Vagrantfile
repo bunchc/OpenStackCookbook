@@ -13,6 +13,8 @@
 # If you have the OpenStackCookbook 'controller' already running
 # you can hash it out below
 
+require 'rbconfig'
+
 nodes = {
     'controller'  => [1, 200],
     'swift'  => [5, 221],
@@ -76,7 +78,7 @@ Vagrant.configure("2") do |config|
 
         box.vm.provision :shell, :path => "#{prefix}.sh"
 
-        # If using Fusion or Workstation
+        # If using Fusion
         #box.vm.provider :vmware_fusion or box.vm.provider :vmware_workstation do |v|
         box.vm.provider :vmware_fusion do |v|
           v.vmx["memsize"] = 1024
@@ -89,26 +91,15 @@ Vagrant.configure("2") do |config|
             v.vmx["memsize"] = 2048
             v.vmx["numvcpus"] = "1"
 
-	    vdiskmanager = '/Applications/VMware\ Fusion.app/Contents/Library/vmware-vdiskmanager'
- 
-            dir = "#{ENV['HOME']}/vagrant-additional-disk"
- 
-            unless File.directory?( dir )
-                Dir.mkdir dir
-            end
- 
-            file_to_disk = "#{dir}/#{hostname}-sdb.vmdk"
- 
-            unless File.exists?( file_to_disk )
-                `#{vdiskmanager} -c -s 20GB -a lsilogic -t 1 #{file_to_disk}`
-            end
- 
+            file_to_disk = add_disk_vmware("Fusion", hostname)
+
             v.vmx['scsi0:1.filename'] = file_to_disk
             v.vmx['scsi0:1.present']  = 'TRUE'
             v.vmx['scsi0:1.redo']     = ''
-	  end
+          end
         end
 
+        # Workstation begins here
         box.vm.provider :vmware_workstation do |v|
           v.vmx["memsize"] = 1024
           if prefix == "controller" 
@@ -119,25 +110,13 @@ Vagrant.configure("2") do |config|
           if prefix == "swift" 
             v.vmx["memsize"] = 2048
             v.vmx["numvcpus"] = "1"
-
-	    vdiskmanager = '/usr/bin/vmware-vdiskmanager'
- 
-            dir = "#{ENV['HOME']}/vagrant-additional-disk"
- 
-            unless File.directory?( dir )
-                Dir.mkdir dir
-            end
- 
-            file_to_disk = "#{dir}/#{hostname}-sdb.vmdk"
- 
-            unless File.exists?( file_to_disk )
-                `#{vdiskmanager} -c -s 20GB -a lsilogic -t 1 #{file_to_disk}`
-            end
+            
+            file_to_disk = add_disk_vmware("Workstation", hostname)
  
             v.vmx['scsi0:1.filename'] = file_to_disk
             v.vmx['scsi0:1.present']  = 'TRUE'
             v.vmx['scsi0:1.redo']     = ''
-	  end
+          end
         end
 
         # Otherwise using VirtualBox
@@ -150,7 +129,7 @@ Vagrant.configure("2") do |config|
             vbox.customize ["modifyvm", :id, "--cpus", 1]
           end
 
-          if prefix == "controller"
+          if prefix == "swift"
             vbox.customize ["modifyvm", :id, "--memory", 2048]
             vbox.customize ["modifyvm", :id, "--cpus", 1]
 
@@ -159,16 +138,44 @@ Vagrant.configure("2") do |config|
             unless File.directory?( dir )
                 Dir.mkdir dir
             end
- 
+
             file_to_disk = "#{dir}/#{hostname}-sdb.vmdk"
  
             unless File.exists?( file_to_disk )
-    		vbox.customize ['createhd', '--filename', file_to_disk, '--size', 20 * 1024]
+              vbox.customize ['createhd', '--filename', file_to_disk, '--size', 20 * 1024]
             end
-  	    vbox.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
-  	  end
+            vbox.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+          end
         end
       end
     end
   end
+end
+
+def add_disk_vmware(product, hostname)
+  puts product
+  # Detect host OS
+  @os = RbConfig::CONFIG['host_os']
+  if product.downcase.include?('fusion')
+    vdiskmanager = '/Applications/VMware\ Fusion.app/Contents/Library/vmware-vdiskmanager'
+  elsif product.downcase.include?('workstation')
+    if @os.downcase.include?('linux')
+      vdiskmanager = '/usr/bin/vmware-vdiskmanager'
+    else
+      #This is where windows goes
+    end
+  end
+  
+  dir = "#{ENV['HOME']}/vagrant-additional-disk"
+
+  unless File.directory?( dir )
+      Dir.mkdir dir
+  end
+
+  file_to_disk = "#{dir}/#{hostname}-sdb.vmdk"
+
+  unless File.exists?( file_to_disk )
+      `#{vdiskmanager} -c -s 20GB -a lsilogic -t 1 #{file_to_disk}`
+  end
+  return file_to_disk
 end
